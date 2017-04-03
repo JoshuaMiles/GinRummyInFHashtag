@@ -23,7 +23,9 @@ let spadeFour = {suit = Spades ; rank = Four }
 
 let spadeKing =  {suit = Spades ; rank = King }
 
-let shuffledHand = seq [ spadeFour; spadeKing ; spadeThree ; heartKing  ; spadeTwo ; heartFour; heartThree ; heartTwo  ]
+let clubTwo = {suit = Clubs ; rank = Two}
+
+let shuffledHand = seq [ spadeFour; spadeKing ; spadeThree ; heartKing  ; spadeTwo ; heartFour; heartThree ; heartTwo ; clubTwo  ]
 
 let matchRank (card:Card) =
     match card.suit with
@@ -34,6 +36,8 @@ let matchRank (card:Card) =
 
 
 let unorderedRunHand = seq [heartFour; heartThree; heartTwo ]
+
+let orderedSetHand = seq [heartTwo ; clubTwo ; spadeTwo ; heartThree ]
 
 let orderedRunHand = seq [ heartTwo; heartThree; heartFour ]
 
@@ -62,14 +66,15 @@ type CardAndHand = {card : Card ; hand : Hand}
 
 let cardAndHandExample = {card = spadeFour; hand = shuffledHand}
 
-
-
 let findIndexOfHand (cardAndHand : CardAndHand) =
     (Seq.findIndex (fun elem -> elem = cardAndHand.card) cardAndHand.hand) 
 
 
 
 let sortBySuit (hand:Hand) =
+    (Seq.sortBy (fun o -> AllRanks |> Seq.findIndex ((=) (o.rank))) hand)
+
+let sortByRank (hand:Hand) =
     (Seq.sortBy (fun o -> AllRanks |> Seq.findIndex ((=) (o.rank))) hand)
 
 let groupAndSortSuit (suit) (hand:Hand) =
@@ -110,7 +115,24 @@ let nextCardIsOneUpAndIsSameSuit (cardAndHand : CardAndHand) =
          else 
             false
 
+
+let nextCardIsSameRank (cardAndHand : CardAndHand) =
+    let rankOfCurrentCard = cardAndHand.card.rank
+    let nextCardOption = findNextCardInHand cardAndHand
+  //  let nextCard = Option.get<Card>( findNextCardInHand card hand)
+    if (nextCardOption.IsNone || nextCardOption.IsNone) then
+        false
+        elif ((Option.get<Card>(nextCardOption)).rank = rankOfCurrentCard) then
+            true
+         else 
+            false
+
+
 let cahUS = {card = spadeTwo; hand =  listOfSortedSuits shuffledHand}
+
+let cahSet = {card = heartTwo ; hand = orderedSetHand }
+
+
 
 
 
@@ -123,11 +145,9 @@ let rec howManyInARow (cardAndHand: CardAndHand) =
     else
         0
 
-
 let rec nestedRunBuilder (cardAndHand : CardAndHand , run : seq<Card>) =
     let nextCard = findNextCardInHand cardAndHand
-
-    let newRun  =Seq.append (seq [cardAndHand.card]) run
+    let newRun  = Seq.append (seq [cardAndHand.card]) run
     if(nextCardIsOneUpAndIsSameSuit cardAndHand) then
        nestedRunBuilder({card = Option.get<Card>( nextCard ) ; hand = Seq.tail cardAndHand.hand }, newRun )      
      else
@@ -142,10 +162,38 @@ let rec runBuilder (cardAndHand : CardAndHand , cardRuns : seq<seq<Card>>) =
     else 
         runBuilder ({card = Option.get<Card> (findNextCardInHand cardAndHand) ; hand = Seq.tail cardAndHand.hand }, newCardRuns)
 
+
+
+        // Not working properly
+let rec nestedSetBuilder (cardAndHand : CardAndHand , set : seq<Card>) =
+    let nextCard = findNextCardInHand cardAndHand
+    let newSet  = Seq.append (seq [cardAndHand.card]) set
+    printfn "%A" nextCard
+    if(nextCardIsSameRank cardAndHand) then
+       nestedSetBuilder({card = Option.get<Card>( nextCard ) ; hand = Seq.tail cardAndHand.hand }, newSet )      
+     else
+        newSet
+
+
+
+let rec setBuilder (cardAndHand : CardAndHand , cardRuns : seq<seq<Card>>) =
+    let currentRun = nestedRunBuilder (cardAndHand , seq<Card>[])
+    let newCardRuns = Seq.append (seq [currentRun]) cardRuns
+    if (Seq.length cardAndHand.hand = 0 || (findNextCardInHand cardAndHand).IsNone) then
+        newCardRuns
+    else 
+        setBuilder ({card = Option.get<Card> (findNextCardInHand cardAndHand) ; hand = Seq.tail cardAndHand.hand }, newCardRuns)
+
+
         
  // Takes an already ordered hand and the first element in the array and sums all the runs in the hand
 let ScoreRunsInHand (cardAndHand : CardAndHand) = 
-    runBuilder(cardAndHand, seq<seq<Card>>[]) |> Seq.filter (fun y -> Seq.length y >= 3) |> Seq.map(fun z ->  Seq.sumBy (cardValue) z) |> Seq.reduce (fun x y -> x + y)
+    runBuilder(cardAndHand, seq<seq<Card>>[]) |> 
+    Seq.filter (fun y -> Seq.length y >= 3) |>
+    Seq.map(fun z ->  Seq.sumBy (cardValue) z) |> 
+    Seq.reduce (fun x y -> x + y)
+
+//let scoreSetsInHand (cardAndHand : CardAndHand)
 
 let Deadwood (hand:Hand) = 
    hand |> Seq.sumBy ( cardValue )
