@@ -93,7 +93,7 @@ namespace QUT
         {
             HumanDeadwood = "Calculating ...";
             // this might take a while, so let's do it in the background
-            int deadwood = await Task.Run(() => GinRummy.Deadwood(HumanCards));
+            int deadwood = await Task.Run(() => GinRummy.Deadwood(HumanCards.ToArray()));
             HumanDeadwood = "Deadwood: " + deadwood;
         }
 
