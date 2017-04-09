@@ -1,95 +1,11 @@
-﻿module GinRummy
-
+module GinRummy
 
 open Cards
-
-
-let cardRankSeq = seq [ Ace; Two; Three; Four; Five; Six; Seven; Eight; Nine; Ten; Jack; Queen; King ]
-
-let cardSuitSeq = seq [Hearts ; Clubs ; Diamonds ; Spades ]
-
-let emptyHand = seq<Card>[]
-
-let emptySeqOfCards = seq<seq<Card>>[]
-
-type Set = seq<seq<Card>>
-
-type Run = seq<seq<Card>>
-
-// type setOrRunWithDeadwood = {runOrSet : seq<Card> ; deadWoodValue : int  }
-
-type CardAndHand = {card : Card ; hand : Hand  ; set : Set ; run : Run }
+//let testCardAndHandWithSet = { card = queenHeart; hand =  testHand ; set = seq[seq[tenDiamond;tenClub;tenHeart]] ; run = seq [seq[eightHeart; nineHeart; tenHeart]; seq[spadeTwo;spadeThree;spadeFour]] }
 
 let AllRanks = [ Ace; Two; Three; Four; Five; Six; Seven; Eight; Nine; Ten; Jack; Queen; King ]
 
-let heartTwo  = {suit = Hearts ; rank = Two }
-
-let heartThree = {suit = Hearts ; rank = Three }
-
-let heartFour = {suit = Hearts ; rank = Four }
-
-let heartKing =  {suit = Hearts ; rank = King }
-
-let spadeTwo  = {suit = Spades ; rank = Two }
-
-let spadeThree = {suit = Spades ; rank = Three } 
-
-let spadeFour = {suit = Spades ; rank = Four }
-
-let spadeKing =  {suit = Spades ; rank = King }
-
-let clubTwo = {suit = Clubs ; rank = Two}
-
-let eightHeart = {suit = Hearts ; rank = Eight}
-
-let nineHeart = {suit = Hearts ; rank = Nine}
-
-let threeHeart = {suit = Hearts ; rank = Three}
-
-let fiveHeart = {suit = Hearts ; rank = Five}
-
-let queenHeart = {suit = Hearts ; rank = Queen}
-
-let tenHeart = {suit = Hearts ; rank = Ten}
-
-let tenDiamond = {suit = Diamonds ; rank = Ten}
-
-let tenClub = {suit = Clubs ; rank = Ten}
-
-let tenSpade = {suit = Spades; rank = Ten}
-
-let sixHeart  = {suit = Hearts; rank = Six}
-
-let sevenHeart  = {suit = Hearts; rank = Seven}
-
-
-let testHand = seq [ eightHeart ; nineHeart ; threeHeart ; heartTwo ; heartFour ; fiveHeart ; sixHeart; sevenHeart ; queenHeart ; tenHeart ; tenDiamond ; tenClub ; tenSpade ; spadeTwo ; clubTwo ]
-
-
-let testRun = seq [eightHeart ; nineHeart ; tenHeart]
-
-//let testCardAndHandWithSet = { card = queenHeart; hand =  testHand ; set = seq[seq[tenDiamond;tenClub;tenHeart]] ; run = seq [seq[eightHeart; nineHeart; tenHeart]; seq[spadeTwo;spadeThree;spadeFour]] }
-
-let shuffledHand = seq [ spadeFour; spadeKing ; spadeThree ; heartKing  ; spadeTwo ; heartFour; heartThree ; heartTwo ; clubTwo  ]
-
-let matchRank (card:Card) =
-    match card.suit with
-        | Hearts -> Hearts
-        | Spades -> Spades
-        | Diamonds -> Diamonds
-        | Clubs -> Clubs
-
-
-let unorderedRunHand = seq [heartFour; heartThree; heartTwo ]
-
-let orderedSetHand = seq [heartTwo ; clubTwo ; spadeTwo ; heartThree ]
-
-let orderedRunHand = seq [ heartTwo; heartThree; heartFour ]
-
-let orderedRunHandWithAddedCard = seq [ heartTwo; heartThree; heartFour ; spadeTwo ]
-
-let partialRunHand = seq [ heartTwo; heartThree ]
-
+// Assigns a deadwood value for every card 
 let cardValue (card:Card) =
     match card.rank with
     | Two -> 2
@@ -102,29 +18,41 @@ let cardValue (card:Card) =
     | Nine -> 9
     | _ -> 10
 
-let cardAndHandExample = {card = spadeFour; hand = shuffledHand ; set = emptySeqOfCards ; run = emptySeqOfCards }
-
-let findIndexOfHand (card: Card, hand : Hand) =
-    (Seq.findIndex (fun elem -> elem = card) hand) 
-
 let sortBySuit (hand:Hand) =
     (Seq.sortBy (fun o -> AllRanks |> Seq.findIndex ((=) (o.rank))) hand)
-
-let sortByRank (hand:Hand) =
-    (Seq.sortBy (fun o -> AllRanks |> Seq.findIndex ((=) (o.rank))) hand)
-
-let getLowestValuedCard (hand:Hand) =
-   hand |> sortByRank |> Seq.head
 
 
 let groupAndSortSuit (suit) (hand:Hand) =
      (Seq.filter (fun elem -> elem.suit = suit) hand) |> sortBySuit 
+
 
 let listOfSortedSuits (hand : Hand) = 
     groupAndSortSuit Spades hand ::
     groupAndSortSuit Hearts hand ::
     groupAndSortSuit Diamonds hand ::
     groupAndSortSuit Clubs hand :: [] |> Seq.collect id
+
+   
+let testHand = seq [ eightHeart ; nineHeart ; threeHeart ; heartTwo ; heartFour ; fiveHeart ; sixHeart; sevenHeart ; queenHeart ; tenHeart ; tenDiamond ; tenClub ; tenSpade ; spadeTwo ; clubTwo ]
+
+let emptyHand = seq<Card>[]
+
+let testCardAndHand = { card = queenHeart; hand =  listOfSortedSuits testHand ; set = emptySeqOfCards ; run = emptySeqOfCards }
+
+let testCardAndEmptyHandWithSetAndRun = { card = queenHeart; hand =  emptyHand ; set = seq[seq[tenDiamond;tenClub;tenHeart]] ; run = seq [seq[eightHeart; nineHeart; tenHeart]; seq[spadeTwo;spadeThree;spadeFour]] }
+let testCardAndEmptyHand = { card = queenHeart; hand =  emptyHand ; set = emptySeqOfCards  ; run = emptySeqOfCards}
+
+
+let testCardAndHandSingleCard = { card = tenDiamond; hand = seq[tenDiamond] ; set = emptySeqOfCards  ; run = emptySeqOfCards}
+
+
+let findIndexOfHand (card: Card, hand : Hand) =
+    (Seq.findIndex (fun elem -> elem = card) hand) 
+let sortByRank (hand:Hand) =
+    (Seq.sortBy (fun o -> AllRanks |> Seq.findIndex ((=) (o.rank))) hand)
+
+let getLowestValuedCard (hand:Hand) =
+   hand |> sortByRank |> Seq.head
 
 let findIndexOfRank (card:Card) =
     Seq.findIndex (fun elem -> elem = card.rank) cardRankSeq
@@ -141,7 +69,10 @@ let findNextCardInHand (card:Card, hand : Hand) =
     else Some (Seq.nth ((Seq.findIndex (fun elem -> elem = card) hand) + 1 ) hand) 
  
 let tail (sequence) =
-    Seq.filter (fun x -> not (x = (Seq.head sequence))) (sequence)
+    if (Seq.length sequence > 0 ) then
+        Seq.filter (fun x -> not (x = (Seq.head sequence))) (sequence)
+    else
+        sequence
 
 //Finds whether there exists a card which is an element of one sequence
 let twoSeqHaveOneElementInCommon (seq1 : seq<Card> , seq2 : seq<Card>) =
@@ -217,17 +148,13 @@ let incrementRank (card : Card ) =
         card
     else
         {suit = card.suit ; rank = Option.get<Rank>(rankOfNextCard) }
- 
-let testCardAndHand = { card = heartTwo; hand =  listOfSortedSuits testHand ; set = emptySeqOfCards ; run = emptySeqOfCards}
-let testCardAndHandDiff = { card = heartTwo; hand =  listOfSortedSuits testHand ; set = emptySeqOfCards ; run = emptySeqOfCards}
-
 
 // Returns whether the next card is the same rank as the current card
 let nextCardIsSameRank (cardAndHand : CardAndHand) =
     let rankOfCurrentCard = cardAndHand.card.rank
     let nextCardOption = findNextCardInHand (cardAndHand.card,cardAndHand.hand)
   //  let nextCard = Option.get<Card>( findNextCardInHand card hand)
-    if (nextCardOption.IsNone || nextCardOption.IsNone) then
+    if ( nextCardOption.IsNone ) then
         false
         elif ((Option.get<Card>(nextCardOption)).rank = rankOfCurrentCard) then
             true
@@ -240,7 +167,6 @@ let nextCardIsOneUpAndIsSameSuit (cardAndHand : CardAndHand) =
     let currentCardsRank = cardAndHand.card.rank
     let nextCardsRankOption = findNextRank cardAndHand.card
     let nextCardOption = findNextCardInHand (cardAndHand.card ,cardAndHand.hand )
-  //  let nextCard = Option.get<Card>( findNextCardInHand card hand)
     if (nextCardOption.IsNone || nextCardsRankOption.IsNone) then
         false
         elif ((Option.get<Card>(nextCardOption)).rank = Option.get<Rank>(findNextRank cardAndHand.card) && (Option.get<Card>(nextCardOption)).suit = cardAndHand.card.suit) then
@@ -259,8 +185,6 @@ let rec nestedRunBuilder (cardAndHand : CardAndHand , run : seq<Card>) =
         (cardAndHand.card, newRun)
     else
         (Option.get<Card>(nextCard) , Seq.append (seq [cardAndHand.card]) run)
-
-
 
 // uses the nested run builder to find all the runs inside of the hand
 let rec runBuilder (cardAndHand : CardAndHand ) =
@@ -288,8 +212,6 @@ let rec populateSets (cardAndHand : CardAndHand) =
     else
         cardAndHand.set |> Seq.filter (fun cardSeq -> not((Seq.length cardSeq) = 0))
 
-
-
 //  Puts all of the sets and runs into the Card and Hand argument
 let populateSetsAndRuns (cardAndHand: CardAndHand) =
     {card = cardAndHand.card ; hand = cardAndHand.hand ; set = cardAndHand |> populateSets; run = cardAndHand |> runBuilder}
@@ -304,19 +226,27 @@ let putDeadWoodCalculationTogether (cardAndHand: CardAndHand) =
 let combinedPopulatedSetsAndRunsWithDeadWoodCalculation (cardAndHand) =
     cardAndHand |> populateSetsAndRuns |> putDeadWoodCalculationTogether |> Seq.concat
 
-    // UP TO HERE need to frst get all the distinct sets and runs and than filter
+    // Tankes the 
 let findLeftoverInsideHand (cardAndHand : CardAndHand) =
+    printfn "%A" (combinedPopulatedSetsAndRunsWithDeadWoodCalculation cardAndHand)
     cardAndHand.hand |> Seq.filter (fun elem ->(Seq.exists (fun card -> card = elem) (combinedPopulatedSetsAndRunsWithDeadWoodCalculation cardAndHand))=false ) 
 
+// Constructs the card and hand state
 let constructCardAndHand (hand: Hand) =
     {card = Seq.head hand ; hand = hand ; set = emptySeqOfCards ; run = emptySeqOfCards}
 
-
-
+  
+// Takes a hand and gets the value of the deadwood of the cards that for the remaining cards 
 let Deadwood (hand:Hand) = 
-   constructCardAndHand hand  |> findLeftoverInsideHand |> Seq.sumBy (cardValue)
-    
-    // Fixme change so that it computes the actual deadwood score
+   printfn "%A" (hand |> listOfSortedSuits |>  constructCardAndHand )
+   hand |> listOfSortedSuits |>  constructCardAndHand |> findLeftoverInsideHand |> Seq.sumBy (cardValue)
+ 
+ 
+   (* 
+let Deadwood (hand:Hand) = 
+    hand |> Seq.sumBy ( cardValue )
+    *)
+// Fixme change so that it computes the actual deadwood score
 
 let Score (firstOut:Hand) (secondOut:Hand) =
     0
