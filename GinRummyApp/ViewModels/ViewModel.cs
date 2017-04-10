@@ -91,11 +91,14 @@ namespace QUT
             Discards.Add(p);
         }
 
-        async private void HumanCards_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+         async private void HumanCards_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
         {
             HumanDeadwood = "Calculating ...";
             // this might take a while, so let's do it in the background
             int deadwood = await Task.Run(() => GinRummy.Deadwood(HumanCards.ToArray()));
+            
+            //int deadwood = GinRummy.Deadwood(GinRummy.listOfSortedSuits(HumanCards).ToArray());
+            System.Console.WriteLine(GinRummy.listOfSortedSuits(HumanCards).ToArray().ToString());
             HumanDeadwood = "Deadwood: " + deadwood;
         }
 

@@ -1,4 +1,5 @@
 ﻿module Cards
+
 //Any generic card type
 type Suit = Spades | Clubs | Hearts | Diamonds
 type Rank = Ace | Two | Three | Four | Five | Six | Seven | Eight | Nine | Ten | Jack | Queen | King
@@ -91,9 +92,7 @@ let sixHeart  = {suit = Hearts; rank = Six}
 
 let sevenHeart  = {suit = Hearts; rank = Seven}
 
-
 let testHand = seq [ eightHeart ; nineHeart ; threeHeart ; heartTwo ; heartFour ; fiveHeart ; sixHeart; sevenHeart ; queenHeart ; tenHeart ; tenDiamond ; tenClub ; tenSpade ; spadeTwo ; clubTwo ]
-
 
 let testRun = seq [eightHeart ; nineHeart ; tenHeart]
 
