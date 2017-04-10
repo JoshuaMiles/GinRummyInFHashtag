@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using System.Linq;
 
 namespace QUT
 {
@@ -45,7 +46,8 @@ namespace QUT
 
         private async void Deal()
         {
-            var deck = Cards.Shuffle(Cards.FullDeck);
+           // var deck = Cards.Shuffle(Cards.FullDeck);
+            var deck = Cards.FullDeck;
 
             foreach (var card in deck)
             {
