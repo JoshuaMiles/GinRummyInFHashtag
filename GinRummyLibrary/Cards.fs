@@ -77,6 +77,21 @@ let jackHeart = {suit = Hearts ; rank = Jack}
 
 let tenHeart = {suit = Hearts ; rank = Ten}
 
+let diamondTwo  = {suit = Diamonds ; rank = Two}
+
+let diamondFour  = {suit = Diamonds ; rank = Four}
+
+let diamondSix  = {suit = Diamonds ; rank = Six}
+
+let diamondEight  = {suit = Diamonds ; rank = Eight}
+
+let diamondTen  = {suit = Diamonds ; rank = Ten}
+
+let diamondQueen  = {suit = Diamonds ; rank = Queen}
+
+
+
+
 let tenDiamond = {suit = Diamonds ; rank = Ten}
 
 let tenClub = {suit = Clubs ; rank = Ten}

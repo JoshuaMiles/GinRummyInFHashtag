@@ -98,7 +98,6 @@ namespace QUT
             int deadwood = await Task.Run(() => GinRummy.Deadwood(HumanCards.ToArray()));
             
             //int deadwood = GinRummy.Deadwood(GinRummy.listOfSortedSuits(HumanCards).ToArray());
-            System.Console.WriteLine(GinRummy.listOfSortedSuits(HumanCards).ToArray().ToString());
             HumanDeadwood = "Deadwood: " + deadwood;
         }
 
@@ -126,6 +125,14 @@ namespace QUT
         private void ButtonClick()
         {
             RaiseNotification("You clicked the Button!", "Title");
+
+
+            HumanCards.CollectionChanged -= HumanCards_CollectionChanged;
+            Cards.Card[] cards =  GinRummy.listOfSortedSuits(HumanCards).ToArray();
+            //HumanCards = new ObservableCollection<Cards.Card>(cards);
+            HumanCards.Clear();
+            HumanCards.AddRange(cards);
+            HumanCards.CollectionChanged += HumanCards_CollectionChanged;
         }
     }
 }
