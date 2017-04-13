@@ -46,8 +46,7 @@ namespace QUT
 
         private async void Deal()
         {
-           // var deck = Cards.Shuffle(Cards.FullDeck);
-            var deck = Cards.FullDeck;
+            var deck = Cards.Shuffle(Cards.FullDeck);
 
             foreach (var card in deck)
             {
@@ -128,7 +127,7 @@ namespace QUT
 
 
             HumanCards.CollectionChanged -= HumanCards_CollectionChanged;
-            Cards.Card[] cards =  GinRummy.listOfSortedSuits(HumanCards).ToArray();
+            Cards.Card[] cards =  GinRummy.sortByRankAndSuit(HumanCards).ToArray();
             //HumanCards = new ObservableCollection<Cards.Card>(cards);
             HumanCards.Clear();
             HumanCards.AddRange(cards);

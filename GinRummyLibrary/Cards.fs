@@ -23,8 +23,9 @@ let allCards =
 let FullDeck = 
     allCards
 
+let rand = System.Random()
+
 let Shuffle (deck:Deck) =
-    let rand = System.Random()
     Seq.sortBy (fun _ -> rand.Next() ) deck
 
 
@@ -101,9 +102,6 @@ let diamondEight  = {suit = Diamonds ; rank = Eight}
 let diamondTen  = {suit = Diamonds ; rank = Ten}
 
 let diamondQueen  = {suit = Diamonds ; rank = Queen}
-
-
-
 
 let tenDiamond = {suit = Diamonds ; rank = Ten}
 

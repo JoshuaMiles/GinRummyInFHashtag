@@ -4,8 +4,13 @@ open Cards
 open GinRummy
 
 type Move = Gin | Knock | Continue
+
+
+
     
 let ComputerPickupDiscard computerHand topDiscard possibleDeck =
+    let deadWood = Deadwood computerHand
+    
     true
     // Fixme: change function so that it computes if Computer should pickup from Discard pile 
     //        or draw a fresh card from the deck
