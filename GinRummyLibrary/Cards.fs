@@ -215,7 +215,9 @@ let Hand18 = seq [C9;S5;S7;S8;S3;S9;C8;SA;S4;S6;S2]
 let Hand19 = seq [S5;S7;S8;S3;C9;C10;SA;S4;S6;S2]
 let Hand20 = seq [H10;C6;C8;D8;H4;C10;D10;SA;D5;C7;S2]
 let Hand21 = seq [S3;C4;C5;SA;S9;S10;HA;S2;C3;DA]
+
 let Hand22 = seq [C3;D2;DA;S3;S9;S10;SA;H3;D3;S2]
+
 let Hand27 = seq [S5;S7;C8;S3;S9;S10;SA;S4;S6;S2]
 let Hand29 = seq [S3;H3;C8;DA;S9;S10;SA;S2;C3;HA]
 let Hand30 = seq [C3;C5;C8;S3;S9;S10;SA;H3;C4;S2]
