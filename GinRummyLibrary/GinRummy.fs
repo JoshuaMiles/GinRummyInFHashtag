@@ -95,7 +95,7 @@ let findDeadWoodValueOfTuple (runAndSetTuple:seq<Card>*seq<Card>) =
 // Takes a tuple of runs and sets and returns the one with the greater value, if they are equal it just returns the run
 
 
-let chooseTheLargerValueInCardTuple (runAndSetTuple:seq<Card>*seq<Card>, hand :Hand)=
+let chooseTheLargerValueInCardTuple (runAndSetTuple:seq<Card>*seq<Card>)=
     let run,set = runAndSetTuple 
     let runValue = getValueOfDeadWoodInSeq run
     let setValue = getValueOfDeadWoodInSeq set
@@ -105,6 +105,19 @@ let chooseTheLargerValueInCardTuple (runAndSetTuple:seq<Card>*seq<Card>, hand :H
         set
     else 
         run
+
+
+let chooseTheLowerValueInCardTuple (runAndSetTuple:seq<Card>*seq<Card>)=
+    let run,set = runAndSetTuple 
+    let runValue = getValueOfDeadWoodInSeq run
+    let setValue = getValueOfDeadWoodInSeq set
+    if (runValue < setValue) then
+        run
+    elif(setValue < runValue) then
+        set
+    else 
+        run
+
 
 
 let resultingHandValue (cardSequence,hand) = 
@@ -117,7 +130,7 @@ let rec getMostValuableSeqs (seqOfTuples:seq<seq<Card>*seq<Card>>,hand, bestValu
     if ((Seq.length seqOfTuples) >= 1 ) then
         let seqOfTuplesTail = tail seqOfTuples
         let seqOfTuplesHead = Seq.head 
-        let newBestValued = seqOfTuples |> Seq.map (fun setAndRun ->  chooseTheLargerValueInCardTuple( setAndRun,hand )) |> Seq.append bestValuedSeqs |> Seq.filter (fun elem -> not (Seq.length elem = 0)) |> Seq.distinctBy id
+        let newBestValued = seqOfTuples |> Seq.map (fun setAndRun ->  chooseTheLargerValueInCardTuple( setAndRun )) |> Seq.append bestValuedSeqs |> Seq.filter (fun elem -> not (Seq.length elem = 0)) |> Seq.distinctBy id
         getMostValuableSeqs (seqOfTuplesTail,hand, newBestValued)
     else 
         bestValuedSeqs
@@ -206,6 +219,37 @@ let getAllPossibleRuns (cardAndHand) =
     Seq.append addedPossibleRuns allFullRuns |> Seq.distinct
 
 
+
+
+(*
+1) those cards that could be used in either a set or a run, allExclusiveCards
+2) those cards that could be used in a set, but not in a run, allExclusiveSetCards
+3) those cards that could be used in a run, but not in a set, allExclusiveRunCards
+4) those cards that can not be used in a set or a run. findLeftoverInsideHand
+Create a helper (recursive) function that takes these 4 sets of cards as parameters. If the first set of cards is empty, then the deadwood score can be computed relatively straight forwardly. If the first set of cards is not empty, then take one of those cards and try adding it to the set of cards that can only be used to form runs. Then try adding it to the set of cards that can only be used to form sets. Check which of these (recursive function calls) leads to the lowest deadwood score.
+*)
+//Cards that are only in a sets but not in a run
+
+let allExclusiveSetCards (cardAndHand) =
+    cardAndHand.set |> Seq.concat |> Seq.distinct |> Seq.filter (fun x -> not(Seq.exists (fun elem ->(elem = x)) (Seq.concat cardAndHand.run |> Seq.distinct)) ) 
+
+let allExclusiveRunCards (cardAndHand) =
+    cardAndHand.run |> Seq.concat |> Seq.distinct |> Seq.filter (fun x -> not(Seq.exists (fun elem ->(elem = x)) (Seq.concat cardAndHand.set |> Seq.distinct)) ) 
+
+let allExclusiveCards (cardAndHand) =
+    let allSets = cardAndHand.set |> Seq.concat 
+    let allRuns = cardAndHand.run |> Seq.concat 
+    findIntersectionBetweentwoSequences (allSets, allRuns)
+
+let populateSeqOfTuplesWithIntersection (run, set) = 
+    run |> Seq.map(fun runMapped -> if ((Seq.length (findIntersectionBetweentwoSequences(Seq.head set, runMapped))) > 0) then (Seq.head set,runMapped) else (seq<Card>[],seq<Card>[]))  // The if statement wouldn't work without having an else, filtered it out later
+
+
+
+
+
+
+
 // Takes a set and finds all combinations of the set 
 let allCombinationsOfSetSequence (setSeq) =
     setSeq |> Seq.map ((fun x ->  Seq.append (Seq.filter (fun y -> not(x = y)) setSeq) (seq<Card>[]))) 
@@ -229,9 +273,6 @@ let rec populateSets (cardAndHand : CardAndHand) =
 let populateSetsAndRuns (cardAndHand: CardAndHand) =
     {card = cardAndHand.card ; hand = cardAndHand.hand ; set = cardAndHand |> populateSets; run = cardAndHand |> getAllPossibleRuns  |> Seq.filter (fun elem ->Seq.length elem >= 3) }
 
-// Takes a sequence of runs and a sequence of sets and finds if any of the runs intersect with the sets. Returns a tuple for each intersection.
-let populateSeqOfTuplesWithIntersection (run, set) =
-    run |> Seq.map(fun runMapped -> if ((Seq.length (findIntersectionBetweentwoSequences(Seq.head set, runMapped))) > 0) then (Seq.head set,runMapped) else (seq<Card>[],seq<Card>[])) // The if statement wouldn't work without having an else, filtered it out later
     
 // Takes two sequences of sequences and an empty sequence of tuples and returns all sequences that fit the criteria tupled together
 let rec findIntersectionBetweenTwoSequencesOfSequences (cardAndHand, seqOfTuples:seq<seq<Card>*seq<Card>>) =
@@ -290,10 +331,14 @@ let filteredHand (hand, toBeFiltered) =
    // printfn "%A"  (findLeftOver(hand, Seq.concat toBeFiltered) |> sortByRankAndSuit)
     findLeftOver(hand, Seq.concat toBeFiltered) |> sortByRankAndSuit
 
+let filteredCards (hand, toBeFiltered) =
+   // printfn "%A"  (findLeftOver(hand, Seq.concat toBeFiltered) |> sortByRankAndSuit)
+    findLeftOver(hand, toBeFiltered) |> sortByRankAndSuit
+
 let letFilteredCardAndHandAndpopulated (hand , toBeFiltered) =
     {card = (Seq.head (filteredHand( hand, toBeFiltered ))) ; hand = filteredHand( hand, toBeFiltered ); set = emptySeqOfCards ; run = emptySeqOfCards} |> populateSetsAndRuns
  
-let rec getAllUnecessary (cardAndHand, ignore) =
+let rec getAllFirstIgnore (cardAndHand, ignore) =
     let newIgnore =  Seq.append (getConflict cardAndHand ) ignore
 
     let newPopulatedCardAndHand = letFilteredCardAndHandAndpopulated(cardAndHand.hand,newIgnore)
@@ -303,36 +348,68 @@ let rec getAllUnecessary (cardAndHand, ignore) =
         if (((Seq.length newPopulatedCardAndHand.run > 0) || (Seq.length  newPopulatedCardAndHand.set) > 0) ) then
 
          //   printfn "inner if " 
-            getAllUnecessary (newPopulatedCardAndHand, newIgnore )
+            getAllFirstIgnore (newPopulatedCardAndHand, newIgnore )
         else
             //printfn "newPopulatedCardAndHand.hand   %A " newPopulatedCardAndHand.hand
-            newPopulatedCardAndHand.hand
+            filteredHand(cardAndHand.hand,newIgnore )
     else 
-        findLeftOver (cardAndHand.hand ,  Seq.append (Seq.concat cardAndHand.set) (Seq.concat cardAndHand.run) )
-
-
-let testHand = seq [ eightHeart ;eightSpade; nineSpade  ; nineHeart ; tenHeart ; threeHeart ; heartTwo ; heartFour ; fiveHeart ; sixHeart; sevenHeart ; queenHeart ; tenDiamond ; tenClub  ]
-let testHandWithFullSet = seq [threeHeart ; diamondThree ; spadeThree ; clubThree]
-
-let testHandFaulty = seq [diamondQueen;  diamondTen ; diamondEight ; diamondSix ;diamondFour;diamondTwo ; jackHeart ; nineHeart ;sevenHeart ;  sixHeart; fiveHeart  ]
-let testCardAndHandFaulty = { card = Seq.head (sortByRankAndSuit testHandFaulty) ; hand = (sortByRankAndSuit  testHandFaulty ); set = emptySeqOfCards; run =emptySeqOfCards}
-
-let testCardAndHandFullSet = { card = Seq.head ( testHandWithFullSet ); hand =  testHandWithFullSet ; set = emptySeqOfCards ; run = emptySeqOfCards }
+         filteredHand(cardAndHand.hand, (Seq.append (cardAndHand.run) (cardAndHand.set)) )
 
 
     
+let isIntersection(seq1: seq<Card>, seq2:seq<Card>) =
+    (Set.count (Set.intersect (Set.ofSeq seq1) (Set.ofSeq seq2)) > 0) 
+ 
+
+
+let allSetsAndRunsWithoutConflict (set,run) =
+    run |> Seq.map (fun runSeq -> set |> Seq.map (fun setSeq ->  if (not(isIntersection(runSeq, setSeq))) then (Seq.append runSeq setSeq) else seq<Card>[])) |> Seq.map( Seq.filter (fun x -> not(Seq.length x = 0))) |> Seq.concat
+
+
+
+let testFunction (cardAndHand) =
+    let getAllIgnoreCardWithConflict = getAllFirstIgnore(cardAndHand, seq<seq<Card>>[])
+    let getAllIgnoreCardWithOutConflict = allSetsAndRunsWithoutConflict(cardAndHand.run,cardAndHand.set) |> Seq.map (fun x -> filteredCards(cardAndHand.hand, x)) 
+    getAllIgnoreCardWithOutConflict |>  Seq.map (fun noConflict -> (getAllIgnoreCardWithConflict,noConflict) )  //Seq.concat
+
+  
+let rec reduceToTheLowestValue(sequenceOfCards:seq<seq<Card>>, currentLowest) =
+    printfn "%A" (Seq.length sequenceOfCards)
+    if ((Seq.length sequenceOfCards)> 0 ) then 
+        let sequenceHeadValue = Seq.head sequenceOfCards |> Seq.sumBy cardValue
+        
+        if (sequenceHeadValue > (currentLowest |> (Seq.sumBy cardValue))) then
+            reduceToTheLowestValue(tail sequenceOfCards, Seq.head sequenceOfCards)
+        else 
+            reduceToTheLowestValue(tail sequenceOfCards, currentLowest)
+    else
+        printfn "%A" currentLowest
+        currentLowest
+
+let withOrWithoutConflict (cardAndHand)  =
+    if((Seq.length (testFunction(cardAndHand))) > 0 ) then
+        printfn "%A" (cardAndHand |> testFunction |> Seq.map(fun (tuple1,tuple2) -> if ((tuple1 |> Seq.sumBy cardValue) < (tuple2 |> Seq.sumBy cardValue)) then tuple1 else tuple2 ))
+        let x = (cardAndHand |> testFunction |> Seq.map(fun (tuple1,tuple2) -> if ((tuple1 |> Seq.sumBy cardValue) <= (tuple2 |> Seq.sumBy cardValue)) then tuple1 else tuple2 )) 
+        reduceToTheLowestValue(x, seq<Card>[])
+    else 
+        getAllFirstIgnore(cardAndHand, seq<seq<Card>>[])
+
+let reduceToTheBestAtThisPointInTime(cardAndHand) =
+    let getCurrentBest = withOrWithoutConflict (cardAndHand)
+    match (Seq.length getCurrentBest) with 
+    | 0 -> 0
+    | _ -> getCurrentBest |> Seq.distinct |> Seq.sumBy cardValue
 
 // Constructs the card and hand state
 let constructCardAndHand (hand: Hand) =
     let sortedHand = sortByRankAndSuit hand
     {card = Seq.head sortedHand ; hand = sortedHand ; set = emptySeqOfCards ; run = emptySeqOfCards}
 
-
 // Takes a hand and gets the value of the deadwood of the cards that for the remaining cards 
 let Deadwood (hand:Hand) =
     //printfn "currentHand %A" 
       //  getAllUnecessary(populateSetsAndRuns  (constructCardAndHand (hand )), seq<seq<Card>>[])  
-    getAllUnecessary(populateSetsAndRuns  (constructCardAndHand (hand )), seq<seq<Card>>[]) |> Seq.sumBy (cardValue)
+    reduceToTheBestAtThisPointInTime(populateSetsAndRuns (constructCardAndHand (hand)))
     
    // printfn "sum of left over%A" sumOfLeftOver
 
@@ -346,7 +423,7 @@ let Score (firstOut:Hand) (secondOut:Hand) =
         secondHandScore - firstHandScore
     else 
         (-firstHandScore) - 25
-    
+
     // Fixme change so that it computes how many points should be scored by the firstOut hand
     // (score should be negative if the secondOut hand is the winner)
 
