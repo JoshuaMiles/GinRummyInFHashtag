@@ -36,6 +36,7 @@
         </i:Interaction.Triggers>
 
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"  Grid.Row="0" >
+            <Label Foreground="White" FontSize="20" HorizontalAlignment="Center" Content="{Binding ComputerThoughts}"/>
         </StackPanel>
 
         <ItemsControl ItemsSource="{Binding Path=ComputerCards}" Grid.Row="1">
@@ -43,7 +44,7 @@
                 <DataTemplate>
                     <Image Width="80" Margin="5" >
                         <Image.Source>
-                            <Binding Converter="{StaticResource HiddenCardConverter}"/>
+                            <Binding Converter="{StaticResource VisibleCardConverter}"/>
                         </Image.Source>
                     </Image>
                 </DataTemplate>
@@ -57,7 +58,12 @@
 
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"  Grid.Row="2" >
 
-            <Button Command="{Binding ButtonCommand}" Content="Button" Width="100" FontSize="20" Height="100" Margin="10,10,50,10"/>
+            <Button Command="{Binding GinCommand}" Content="Gin!" Width="110" FontSize="20" Height="100" Margin="10,10,50,10" Background="LightGreen"  />
+
+            <Button Command="{Binding ButtonCommand}" Content="Knock..." Width="100" FontSize="20" Height="100" Margin="10,10,50,10" Background="Maroon" Foreground="WhiteSmoke"/>
+
+            <Button Command="{Binding ResetCommand}" Content="Reset Game" Width="110" FontSize="20" Height="100" Margin="10,10,50,10" Background="Red" Foreground="WhiteSmoke" />
+
 
             <ItemsControl ItemsSource="{Binding Path=Discards}" >
                 <ItemsControl.ItemTemplate>
@@ -96,6 +102,8 @@
                         </Image>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
+                
+                
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <local:DeckPanel/>
