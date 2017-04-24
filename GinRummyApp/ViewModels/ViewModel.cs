@@ -69,7 +69,7 @@ namespace QUT
 
         private async void Deal()
         {
-            // ComputerThoughts = "You dare challenge I? I can calculate more moves in a second than you can possibly imagine!";
+            ComputerThoughts = "You dare challenge I? I can calculate more moves in a second than you can possibly imagine!";
 
             if (dealFinishied)
             {
@@ -137,7 +137,6 @@ namespace QUT
                 HumanCards.Add(card);
                 takenFromDeckOrDiscardPile = true;
                 canNowDiscard = true;
-
             }
         }
 
@@ -150,7 +149,6 @@ namespace QUT
                 takenFromDeckOrDiscardPile = true;
                 canNowDiscard = true;
             }
-               
         }
 
         private void DiscardCardFromHand(Cards.Card p)
@@ -195,6 +193,42 @@ namespace QUT
 
         private string computerThoughts;
 
+        private string humanScoreString = "Score : 0";
+        private string computerScoreString = "Score : 0" ;
+
+
+
+
+        public string HumanScoreString
+        {
+            get
+            {
+                return humanScoreString;
+            }
+            private set
+            {
+                humanScoreString = value;
+                if (PropertyChanged != null)
+                    PropertyChanged(this, new PropertyChangedEventArgs("HumanScoreString"));
+            }
+        }
+
+        public string ComputerScoreString
+        {
+            get
+            {
+                return computerScoreString;
+            }
+            private set
+            {
+                computerScoreString = value;
+                if (PropertyChanged != null)
+                    PropertyChanged(this, new PropertyChangedEventArgs("ComputerScoreString"));
+            }
+        }
+
+
+
         public string ComputerThoughts
         {
             get
@@ -222,48 +256,55 @@ namespace QUT
             if (Deadwood < 10 && dealFinishied)
             {
                 int currentScore = GinRummy.Score(HumanCards, ComputerCards);
+                int humanDeadwood = GinRummy.Deadwood(HumanCards);
+                int computerDeadwood = GinRummy.Deadwood(ComputerCards);
                 if (currentScore > 0)
                 {
                     HumanScore += currentScore;
+                    RaiseNotification("It seems I have underestimated you,  I only had a Deadwood of " + computerDeadwood + " while you had a "  + humanDeadwood, "Human Knock");
                 }
-                else
-                {
+                else {
                     ComputerScore += (currentScore * -1);
+                    RaiseNotification("You fell into my trap human I had a score of " + ComputerScore + " while you had a weak score of " + HumanScore , "Human Undercut");
                 }
-                // Do something to check what the current score is and see if it is the end of the game
-            }
-
+                nextRound();
+        // Do something to check what the current score is and see if it is the end of the game
         }
+
+}
 
         private void ResetClick()
         {
             if (dealFinishied)
             {
-                takenFromDeckOrDiscardPile = false;
-                canNowDiscard = false;
-                HumanCards.Clear();
-                ComputerCards.Clear();
-                RemainingDeck.Clear();
-                Discards.Clear();
-                Deal();
+                nextRound();
+                HumanScoreString = "Score : 0";
+                ComputerScoreString = "Score : 0";
+
+                ComputerThoughts = "You dare challenge I? I can calculate more moves in a second than you can possibly imagine!";
             }
         }
 
 
         private void GinClick()
         {
+            ComputerScore += 50;
+            CheckForEndGame();
+
             if (Deadwood == 0 && dealFinishied)
             {
                 int currentScore = GinRummy.Score(HumanCards, ComputerCards);
-                if (currentScore > 0 )
+                if (currentScore > 0)
                 {
                     HumanScore += currentScore;
                 }
                 // Do something to check what the current score is and see if it is the end of the game
             }
-            else if(!dealFinishied) {
+            else if (!dealFinishied)
+            {
                 RaiseNotification("Go back to 104, script kiddie.", "Can't go Gin during the deal");
-            } else 
+            }
+            else
             {
                 RaiseNotification("You don't have a low enough Deadwood to go Gin yet, noob!", "Too much Deadwood!");
             }
@@ -273,7 +314,7 @@ namespace QUT
 
         async private void ArtificialPlayer()
         {
-            if (takenFromDeckOrDiscardPile)
+            if (takenFromDeckOrDiscardPile) 
             {
                 while(true)
                 {
@@ -295,15 +336,14 @@ namespace QUT
 
                     if (pickupFromDeckOrDiscard) // picking up from the deck
                     {
-                        // ComputerThoughts = "You can not comprehend how much I know the top of the deck will benefit me, fool!";
+                        ComputerThoughts = "You can not comprehend how much I know the top of the deck will benefit me, fool!";
                         ComputerCards.Add(DrawTopCardFromDeck());
                         await Task.Delay(5000);
                         var cardToAddToDiscard = ComputerPlayer.ComputerMove(ComputerCards);
                         ComputerCards.Remove(cardToAddToDiscard.Item2.Value);
                         Discards.Add(cardToAddToDiscard.Item2.Value);
-                    } else // picking up from the discard
-                    {
-                        ComputerThoughts = "Ahh this card will do very nicely, my thanks for allowing me to have it, fool!" + x;
+                    } else { // picking up from the discard
+                        ComputerThoughts = "Ahh this card will do very nicely, my thanks for allowing me to have it, fool!";
 
                         await Task.Delay(2000);
 
@@ -314,7 +354,6 @@ namespace QUT
                         var cardToAddToDiscard = ComputerPlayer.ComputerMove(ComputerCards);
                         ComputerCards.Remove(cardToAddToDiscard.Item2.Value);
                         Discards.Add(cardToAddToDiscard.Item2.Value);
-
                     }
                     ComputerThoughts = "I now end my turn. Your move, human." + GinRummy.Deadwood(ComputerCards);
 
@@ -326,11 +365,27 @@ namespace QUT
 
         }
 
+        private void nextRound() {
+            CheckForEndGame();
+            takenFromDeckOrDiscardPile = false;
+            canNowDiscard = false;
+            HumanCards.Clear();
+            ComputerCards.Clear();
+            RemainingDeck.Clear();
+            Discards.Clear();
+            Deal();
+        }
 
-
-
-
-
+        private void CheckForEndGame()
+        {
+            if (HumanScore >= 100 )
+            {
+                RaiseNotification("Noooo, how could I have been defeated by such a pathetic creature! \n" + "Human End Score = " + HumanScore + "\n" + "Computer End Score = " + ComputerScore  , "Human Winner");
+                
+            } else if (ComputerScore >= 100) {
+                RaiseNotification("Just as I had planned, bow to me pathetic human for I am greater than you in every way! \n" + "Human End Score = " + HumanScore + "\n" + "Computer End Score = " + ComputerScore, "Machine Winner");
+            }
+        }
 
     }
 }

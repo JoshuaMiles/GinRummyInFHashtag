@@ -19,18 +19,21 @@ let cardValue (card:Card) =
     | Nine -> 9
     | _ -> 10
 
+// Sorts the hand by rank
 let sortByRank (hand:Hand) =
     (Seq.sortBy (fun o -> AllRanks |> Seq.findIndex ((=) (o.rank))) hand)
 
 let groupAndSortSuit (suit) (hand:Hand) =
      (Seq.filter (fun elem -> elem.suit = suit) hand) |> sortByRank 
 
+// Returns the hand back in sorted order
 let sortByRankAndSuit (hand : Hand) = 
     groupAndSortSuit Spades hand ::
     groupAndSortSuit Hearts hand ::
     groupAndSortSuit Diamonds hand ::
     groupAndSortSuit Clubs hand :: [] |> Seq.collect id
 
+// gets the index of the current card in the sequence
 let findIndexOfHand card hand  =
     (Seq.findIndex (fun elem -> elem = card) hand) 
 
@@ -363,4 +366,4 @@ let Score (firstOut:Hand) (secondOut:Hand) =
      elif (firstHandScore < secondHandScore) then
         secondHandScore - firstHandScore
     else 
-        (-firstHandScore) - 25
+        -(firstHandScore - secondHandScore + 25)

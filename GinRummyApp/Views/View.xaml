@@ -35,6 +35,10 @@
             </prism:InteractionRequestTrigger>  
         </i:Interaction.Triggers>
 
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"  Grid.Row="0" >
+            <Label Foreground="Gold" FontSize="20" HorizontalAlignment="Right" Content="{Binding ComputerScoreString}"/>
+        </StackPanel>
+
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"  Grid.Row="0" >
             <Label Foreground="White" FontSize="20" HorizontalAlignment="Center" Content="{Binding ComputerThoughts}"/>
         </StackPanel>
@@ -136,6 +140,10 @@
         </ItemsControl>
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center"  Grid.Row="4" >
             <Label Foreground="White" FontSize="20" HorizontalAlignment="Center" Content="{Binding HumanDeadwood}"/>
+        </StackPanel>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"  Grid.Row="4" >
+            <Label Foreground="Gold" FontSize="20" HorizontalAlignment="Right" Content="{Binding HumanScoreString}"/>
         </StackPanel>
     </Grid>
 </Window>
